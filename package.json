@@ -1,0 +1,21 @@
+{
+  "name": "media",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.py",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "flask": "latest",
+    "flask-cache": "latest",
+    "pymongo": "latest",
+    "python-dotenv": "latest",
+    "cuid": "latest",
+    "image": "latest",
+    "pillow": "latest",
+    "opencv-python": "latest",
+    "numpy": "latest"
+  }
+}
