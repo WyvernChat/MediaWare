@@ -1,37 +1,31 @@
 
-import werkzeug
-from werkzeug.utils import import_string
-
-werkzeug.import_string = import_string
-
 from io import BytesIO
 
 import cuid
-import cv2
-import numpy as np
 from dotenv import dotenv_values
-from flask import Flask, abort, request, send_file, url_for
+from flask import Flask, abort, render_template, request, send_file, url_for
 from PIL import Image
-# from flask_cache import Cache
 from pymongo import MongoClient
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 8*1000*1000
 
-# cache = Cache(config={"CACHE_TYPE": "simple"})
+image_extensions = (".gif", ".pdf", ".png", ".tiff", ".webp")
 
 config = dotenv_values("../.env")
 
 mongo_client = MongoClient(config["DATABASE_URL"])["wyvern-dev"]
 
-def resize_bytes_image(image_bytes: BytesIO):
-    size = int(request.args.get("size")) or 128
+def resize_bytes_image(image_bytes: BytesIO, size: int, format: str = "PNG"):
     photo: Image.Image = Image.open(image_bytes)
-    photo = photo.resize((64, 64))
+    photo = photo.resize((size, size))
     img_byte_arr = BytesIO()
-    photo.save(img_byte_arr, "PNG")
+    photo.save(img_byte_arr, format=format)
     return BytesIO(img_byte_arr.getvalue())
-    # return send_file(BytesIO(img_byte_arr.getvalue()), uploaded_file["type"]) 
+
+@app.get("/")
+def index():
+    return render_template("index.html")
 
 @app.post("/assets")
 def create_upload():
@@ -43,7 +37,6 @@ def create_upload():
         "token": authorization
     })
 
-    # print(request.files)
     if "file" not in request.files:
         return abort(400)
 
@@ -66,14 +59,13 @@ def create_upload():
             "url": url_for("get_upload", id=id)
         }
     else:
-        print("not in form")
         return abort(400)
 
 @app.get("/assets/<id>")
-# @cache.cached(timeout=300)
-def get_upload(id):
+def get_upload(id: str):
+    is_image = id.lower().endswith(image_extensions)
     uploaded_file = mongo_client["uploads"].find_one({
-        "id": id
+        "id": id.split(".")[0] if is_image else id
     })
 
     if uploaded_file == None:
@@ -83,15 +75,17 @@ def get_upload(id):
 
     res = send_file(file_bytes, uploaded_file["type"])
     
-    if uploaded_file["type"].startswith("image/"):
+    if is_image:
         size = int(request.args.get("size") or "128")
-        photo: Image.Image = Image.open(file_bytes)
-        photo = photo.resize((size, size))
-        img_byte_arr = BytesIO()
-        photo.save(img_byte_arr, "PNG")
-        res = send_file(BytesIO(img_byte_arr.getvalue()), uploaded_file["type"])
+        # photo: Image.Image = Image.open(file_bytes)
+        # photo = photo.resize((size, size))
+        # img_byte_arr = BytesIO()
+        # photo.save(img_byte_arr, "PNG")
+        resized_image = resize_bytes_image(file_bytes, size)
+        res = send_file(resized_image, uploaded_file["type"])
     res.cache_control.public = True
     res.cache_control.max_age = 300
+    res.cache_control.no_cache = False
     return res
 
 
