@@ -1,5 +1,7 @@
 {
-  "python.analysis.extraPaths": [
-    "./packages"
-  ]
+    "editor.defaultFormatter": "ms-python.python",
+    "python.analysis.extraPaths": [
+      "./packages"
+    ],
+    "python.analysis.typeCheckingMode": "basic"
 }

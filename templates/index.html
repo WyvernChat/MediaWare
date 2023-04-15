@@ -5,12 +5,33 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <title>MediaWare</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+            src="https://unpkg.com/@tkdkid1000/kitten.js@0.0.3/dist/kitten.umd.js"
+            defer
+        ></script>
     </head>
     <body>
-        <img
-            src="http://localhost:3003/assets/clacn5tn50000kkrq9r9py8dq.gif?size=64"
-            width="128"
-            height="128"
-        />
+        <div
+            id="app"
+            k-data="{
+            fileUpload: document.querySelector('input[type=file]'),
+            image: document.querySelector('img'),
+            loading: false,
+            imageId: 'clacn5tn50000kkrq9r9py8dq',
+            imageSize: 20
+        }"
+        >
+            <input type="range" min="20" max="640" step="20" k-bind="imageSize" />
+            <div
+                k-text="this.loading ? 'Loading...' : `http://localhost:3003/assets/${this.imageId}.png?size=${this.imageSize}`"
+            ></div>
+            <input name="file" type="file" />
+            <button
+                @click="const globalThis = this; const data = new FormData(); data.append('file', this.fileUpload.files[0]); this.loading = true; fetch('/assets', { method: 'POST', body: data, headers: { authorization: localStorage.getItem('token') } }).then(res => res.json()).then((file) => { globalThis.url = file.url; globalThis.image.src = file.url+'.png?size=128'; globalThis.loading = false })"
+            >
+                Upload
+            </button>
+            <img !src="`http://localhost:3003/assets/${this.imageId}.png?size=${this.imageSize}`" />
+        </div>
     </body>
 </html>

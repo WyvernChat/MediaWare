@@ -1,9 +1,11 @@
 {
-  "name": "media",
+  "name": "mediaware",
   "version": "1.0.0",
   "description": "",
-  "main": "index.py",
-  "scripts": {},
+  "main": "mediaware.py",
+  "scripts": {
+    "start": "pwd"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,6 +18,10 @@
     "image": "latest",
     "pillow": "latest",
     "opencv-python": "latest",
-    "numpy": "latest"
+    "numpy": "latest",
+    "requests": "latest",
+    "httpx": "latest",
+    "flask-cors": "latest",
+    "gridfs": "latest"
   }
 }
